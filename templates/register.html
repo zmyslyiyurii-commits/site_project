@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Login / Register</title>
+    <link rel="stylesheet" href="/static/login.css">
+</head>
+<body>
+<div class="container">
+    <div class="heading">Sign In / Sign Up</div>
+
+    <!-- Логін -->
+    <form action="/" method="post" class="form">
+        <input type="hidden" name="action" value="login">
+        <input class="input" type="email" name="email" placeholder="E-mail" required>
+        <input class="input" type="password" name="password" placeholder="Password" required>
+        <input class="login-button" type="submit" value="Sign In">
+    </form>
+
+    <!-- Реєстрація -->
+    <form action="/" method="post" class="form" style="margin-top:20px;">
+        <input type="hidden" name="action" value="register">
+        <input class="input" type="email" name="email" placeholder="New email" required>
+        <input class="input" type="password" name="password" placeholder="New password" required>
+        <input class="login-button" type="submit" value="Sign Up">
+    </form>
+
+    <!-- Повідомлення -->
+    {% if error %}
+        <p style="color:red; text-align:center;">{{ error }}</p>
+    {% endif %}
+    {% if success %}
+        <p style="color:green; text-align:center;">{{ success }}</p>
+    {% endif %}
+</div>
+</body>
+</html>
