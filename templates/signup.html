@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/static/login.css">
+</head>
+<body>
+<div class="container">
+    <div class="heading">Sign Up</div>
+
+    <!-- Форма реєстрації -->
+    <form action="/signup" method="post" class="form">
+        <input class="input" type="email" name="email" placeholder="E-mail" required>
+        <input class="input" type="password" name="password" placeholder="Password" required>
+        <input class="login-button" type="submit" value="Create account">
+    </form>
+
+    <!-- Окрема кнопка для повернення -->
+    <form action="/" method="get" class="form">
+        <button type="submit" class="login-button">Back to Login</button>
+    </form>
+
+</div>
+</body>
+</html>

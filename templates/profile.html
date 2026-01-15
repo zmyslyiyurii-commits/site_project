@@ -1,12 +1,256 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <title>Профіль</title>
+<meta charset="UTF-8">
+<title>Редактор фото</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: #121212;
+    color: #fff;
+}
+
+/* ---------- SIDE MENU ---------- */
+#sideMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 100%;
+    background: #2c3e50;
+    overflow: hidden;
+    transition: width 0.3s;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+#sideMenu:hover {
+    width: 200px;
+}
+
+#menuIconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    cursor: pointer;
+    position: relative;
+}
+#menuIcon {
+    font-size: 36px;
+    color: #fff;
+}
+#menuLabel {
+    position: absolute;
+    left: 70px;
+    background: #ff4d4d;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+#sideMenu:hover #menuLabel { opacity: 1; }
+
+#menuContent {
+    padding: 15px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#sideMenu:hover #menuContent { opacity: 1; }
+
+/* ---------- LOGOUT BUTTON STYLE ---------- */
+.logoutBtn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: #2980b9;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+.logoutBtn:hover { background: #ff4d4d; transform: scale(1.05); }
+
+/* ---------- MAIN ---------- */
+#mainContent {
+    margin-left: 60px;
+    padding: 20px;
+    transition: margin-left 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#sideMenu:hover ~ #mainContent { margin-left: 200px; }
+
+/* ---------- UPLOAD ---------- */
+.custum-file-upload {
+    width: 320px;
+    height: 200px;
+    border: 2px dashed #aaa;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #212121;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: all 0.3s;
+}
+.custum-file-upload:hover {
+    background: #1a1a1a;
+    border-color: #3498db;
+}
+.custum-file-upload svg { height: 60px; fill: #e8e8e8; margin-bottom: 8px; }
+.custum-file-upload span { color: #e8e8e8; font-weight: 500; }
+.custum-file-upload input { display: none; }
+
+/* ---------- WORK AREA ---------- */
+#workArea {
+    width: 780px;
+    height: 480px;
+    background: #1b1b1b;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 30px 0;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+}
+#previewCanvas {
+    max-width: 95%;
+    max-height: 95%;
+    background: #fff;
+    border-radius: 8px;
+    border: 2px solid #444;
+}
+
+/* ---------- SCALE ---------- */
+#scaleSlider {
+    width: 50%;
+    margin-bottom: 20px;
+}
+
+/* ---------- BUTTONS PANEL ---------- */
+#editPanel {
+    position: fixed;
+    bottom: 0;
+    left: 60px;
+    right: 0;
+    height: 120px;
+    background: #181818;
+    border-top: 2px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    z-index: 60;
+}
+
+.editBtn {
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+    border: none;
+    background: #2980b9;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, background 0.2s;
+}
+.editBtn:hover {
+    transform: scale(1.05);
+    background: #ff4d4d;
+}
+.editBtn canvas { width: 40px; height: 40px; margin-bottom: 5px; }
+
+/* ---------- TOAST ---------- */
+#toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #27ae60;
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 8px;
+    display: none;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: fadeInOut 2.5s forwards;
+}
+@keyframes fadeInOut {
+    0% {opacity:0;}
+    10% {opacity:1;}
+    90% {opacity:1;}
+    100% {opacity:0;}
+}
+</style>
 </head>
 <body>
-    <h1>Вітаємо, {{ email }}!</h1>
-    <p>Ви успішно увійшли в систему.</p>
-    <a href="/">Повернутися на логін</a>
+
+<!-- MENU -->
+<div id="sideMenu">
+    <div id="menuIconWrapper">
+        <div id="menuIcon">☰</div>
+        <span id="menuLabel">Меню</span>
+    </div>
+    <div id="menuContent">
+        <p>Email: {{ email }}</p>
+        <button class="editBtn" id="resetBtn">Скинути фото</button>
+        <button class="logoutBtn" onclick="location.href='/logout'">Logout</button>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent">
+    <label class="custum-file-upload" id="fileLabel">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M10 1C9.73478 1 9.48043 1.10536 9.29289 1.29289L3.29289 7.29289C3.10536 7.48043 3 7.73478 3 8V20C3 21.6569 4.34315 23 6 23H7C7.55228 23 8 22.5523 8 22C8 21.4477 7.55228 21 7 21H6C5.44772 21 5 20.5523 5 20V9H10C10.5523 9 11 8.55228 11 8V3H18C18.5523 3 19 3.44772 19 4V9C19 9.55228 19.4477 10 20 10C20.5523 10 21 9.55228 21 9V4C21 2.34315 19.6569 1 18 1H10ZM9 7H6.41421L9 4.41421V7ZM14 15.5C14 14.1193 15.1193 13 16.5 13C17.8807 13 19 14.1193 19 15.5V16V17H20C21.1046 17 22 17.8954 22 19C22 20.1046 21.1046 21 20 21H13C11.8954 21 11 20.1046 11 19C11 17.8954 11.8954 17 13 17H14V16V15.5ZM16.5 11C14.142 11 12.2076 12.8136 12.0156 15.122C10.2825 15.5606 9 17.1305 9 19C9 21.2091 10.7909 23 13 23H20C22.2091 23 24 21.2091 24 19C24 17.1305 22.7175 15.5606 20.9844 15.122C20.7924 12.8136 18.858 11 16.5 11Z"
+                  fill="#e8e8e8"/>
+        </svg>
+        <span>Click to upload image</span>
+        <input id="file" type="file" accept="image/*">
+    </label>
+
+    <div id="workArea">
+        <canvas id="previewCanvas"></canvas>
+    </div>
+
+    <input type="range" id="scaleSlider" min="0.2" max="2" step="0.01" value="1">
+</div>
+
+<!-- EDIT BUTTONS PANEL -->
+<div id="editPanel">
+    <button class="editBtn" id="rotateBtn">Поворот</button>
+    <button class="editBtn" id="flipBtn">Дзеркало</button>
+    <button class="editBtn" id="bwBtn">Ч/Б</button>
+    <button class="editBtn" id="sepiaBtn">Сепія</button>
+    <button class="editBtn" id="contrastBtn">Контраст</button>
+    <button class="editBtn" id="brightnessBtn">Яскравість</button>
+    <button class="editBtn" id="saturateBtn">Насиченість</button>
+    <button class="editBtn" id="invertBtn">Інверсія</button>
+    <button class="editBtn" id="drawBtn">Малювати</button>
+    <button class="editBtn" id="downloadBtn">Завантажити</button>
+</div>
+
+<div id="toast">Ви успішно увійшли!</div>
+<script defer src="{{ url_for('static', path='js/profile.js') }}"></script>
 </body>
 </html>

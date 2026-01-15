@@ -1,16 +1,39 @@
 from passlib.context import CryptContext
+from database import get_db
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-users_db = []
 
-def create_user(email: str, password: str) -> dict:
-    hashed_password = pwd_context.hash(password[:72])  # bcrypt обмеження 72 байти
-    user = {"email": email, "hashed_password": hashed_password}
-    users_db.append(user)
-    return user
+def create_user(email: str, password: str):
+    hashed = pwd_context.hash(password)
 
-def verify_user(email: str, password: str) -> bool:
-    user = next((u for u in users_db if u["email"] == email), None)
-    if not user:
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            "INSERT INTO users (email, password) VALUES (?, ?)",
+            (email, hashed)
+        )
+        conn.commit()
+        return True
+    except:
         return False
-    return pwd_context.verify(password, user["hashed_password"])
+    finally:
+        conn.close()
+
+
+def verify_user(email: str, password: str):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT password FROM users WHERE email = ?",
+        (email,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return False
+
+    return pwd_context.verify(password, row[0])
